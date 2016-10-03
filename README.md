@@ -14,7 +14,7 @@ import java.io.File;
 
 public class main {
     public static void main(String args[]) {
-        File video = new File("The.Big.Bang.Theory.S08E22.720p.HDTV.X264-DIMENSION.mkv");
+        File video = new File("./The.Big.Bang.Theory.S08E22.720p.HDTV.X264-DIMENSION.mkv");
         Subtitle sub = new Subtitle(video, Subtitle.Type.HI);
         sub.download();
     }
@@ -22,7 +22,9 @@ public class main {
 ```
 Output:
 ``` 
-The.Big.Bang.Theory.S08E22.720p.HDTV.X264-DIMENSION.en.srt
+Searching subscene for: The.Big.Bang.Theory.S08E22.720p.HDTV.X264-DIMENSION.mkv
+Download page: https://subscene.com/subtitles/the-big-bang-theory-eighth-season/english/1103453
+Subtitle: ./The.Big.Bang.Theory.S08E22.720p.HDTV.X264-DIMENSION.en.srt
 ```
 
 Other constructors:
