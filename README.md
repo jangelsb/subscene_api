@@ -1,10 +1,10 @@
 # subscene_api
 **This is an Unofficial Subscene API for Java.** 
 
-This is still a WIP. It currently only supports the **HI** (Hearing Impaired) mode. I will update this api soon with **Normal** and **Foreign Language Only** modes.
+This is still a WIP. It currently only supports the HI (Hearing Impaired) mode. I will update this api soon with Normal and Foreign Language Only modes.
 
 ### How does I use it? ###
-Just download the jar file and import it into your project.
+Just download the lastest jar file from the [release page](https://github.com/jangelsb/subscene_api/releases) (or grab a [nightly](https://github.com/jangelsb/subscene_api/tree/master/out/artifacts/subscene_api_jar)) and import it into your project.
 
 Example Usage:
 ```
@@ -52,4 +52,5 @@ Subtitle sub4 = new Subtitle(video, "English", "en", Subtitle.Type.HI);
 * Clone repository
 * Open Intelij
 * Open subscene_api project
+
 
