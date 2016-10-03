@@ -18,7 +18,7 @@ public class Subtitle {
     private String language  = "English";
     private String lanSuffix = "en";
     private File video = null;
-    private Type type = Type.Normal;
+    private Type type = Type.HI;
 
     public Subtitle(File video) {
         this.video = video;
@@ -107,13 +107,13 @@ public class Subtitle {
         return null;
     }
 
-    private String findFirstNonHI(Document doc, String videoNamePure) {
+    private String findFirstNonHI(Document doc, String videoNamePure) throws IOException {
         // if HI doesn't matter, with no check,
         // link = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(English)").first().parent().parent().select("td.a1 a").first().attr("abs:href");
         return null;
     }
 
-    private String findFirstForeignLangOnly(Document doc, String videoNamePure) {
+    private String findFirstForeignLangOnly(Document doc, String videoNamePure) throws IOException {
         return null;
     }
 
