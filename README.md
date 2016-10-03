@@ -1,5 +1,5 @@
 # subscene_api
-**This is an Unofficial Java API for Subscene.com ** 
+**This is an Unofficial Java API for Subscene.com** 
 
 This is still a WIP. It currently only supports the HI (Hearing Impaired) mode. I will update this API soon with Normal and Foreign Language Only modes. 
 
