@@ -85,7 +85,12 @@ public class Subtitle {
         return null;
     }
 
+    // TODO make each JSOUP call a function call for readability
     // grabs the first non colored HI english sub
+    
+    /**
+    * @return the download link for the subtitle
+    */
     private String findFirstHISub(Document doc, String videoNamePure) throws IOException  {
         Elements allPossibleSubtitles = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(" + language + ")");
 
@@ -96,7 +101,10 @@ public class Subtitle {
             if (!candidate.isEmpty()) {
                 String link = candidate.first().parent().select("td.a1 a").first().attr("abs:href");
                 Document doc2 = getDocument(link);
+
+                // download page has the correct filename in the description
                 boolean correctSub = !doc2.select("li.release:contains(" + videoNamePure + ")").isEmpty();
+                // download page has CHI in the description
                 boolean hasCHI = !doc2.select("li.release:contains(CHI)").isEmpty();
                 if(correctSub && !hasCHI) {
                     System.out.println("Download page: " + link);
@@ -117,29 +125,28 @@ public class Subtitle {
         return null;
     }
 
+    // TODO make functions for readability
     private File downloadSub(String videoNamePure, String downloadLink) throws IOException {
 
         // init folder variable
         String videoDirLoc = String.format("%s/tmp", video.getParent());
         File videoDir = new File(videoDirLoc);
 
-        // download zip
-            downloadFile(downloadLink, "subtitle.zip");
-            unzip("subtitle.zip", videoDirLoc);
+        // download and unzip
+        downloadFile(downloadLink, "subtitle.zip");
+        unzip("subtitle.zip", videoDirLoc);
 
-            //delete zip
-            new File("subtitle.zip").delete();
+        // move and rename srt to the current directory
+        File subtitle = videoDir.listFiles()[0];
+        File toReturn = new File(String.format("%s/%s.%s.srt", video.getParent(), videoNamePure, lanSuffix));
+        subtitle.renameTo(toReturn);
 
-            // move and rename srt to the current directory
-            File subtitle = videoDir.listFiles()[0];
-            File toReturn = new File(String.format("%s/%s.%s.srt", video.getParent(), videoNamePure, lanSuffix));
-            subtitle.renameTo(toReturn);
+        // delete files
+        new File("subtitle.zip").delete();
+        FileUtils.deleteDirectory(videoDir);
 
-            // delete tmp folder
-            FileUtils.deleteDirectory(videoDir);
+        System.out.println("Subtitle: " + toReturn);
 
-            System.out.println("Subtitle: " + toReturn);
-
-            return toReturn;
+        return toReturn;
     }
 }
