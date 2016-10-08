@@ -4,10 +4,11 @@ import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+* politely taken from http://www.codejava.net/java-se/file-io/programmatically-extract-a-zip-file-using-java
+*/
 public class FileUtil {
 
-
-    // taken from http://www.codejava.net/java-se/file-io/programmatically-extract-a-zip-file-using-java
     private static final int BUFFER_SIZE = 4096;
 
     /**
@@ -22,8 +23,10 @@ public class FileUtil {
         if (!destDir.exists()) {
             destDir.mkdir();
         }
+
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
         ZipEntry entry = zipIn.getNextEntry();
+
         // iterates over entries in the zip file
         while (entry != null) {
             String filePath = destDirectory + File.separator + entry.getName();

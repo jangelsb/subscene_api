@@ -19,32 +19,39 @@ public class UrlUtil {
        return Jsoup.connect(url).userAgent(userAgent).get();
     }
 
-    //    http://stackoverflow.com/questions/4797593/java-io-ioexception-server-returned-http-response-code-403-for-url
+    /**
+    * politely taken from http://stackoverflow.com/questions/4797593/java-io-ioexception-server-returned-http-response-code-403-for-url
+    */
     public static void downloadFile(String url, String outputFileName) throws IOException {
 
-        String fileName = outputFileName; //The file that will be saved on your computer
-        URL link = new URL(url); //The file that you want to download
+        // The file that will be saved on your computer
+        String fileName = outputFileName;
+
+        // The file that you want to download
+        URL link = new URL(url); 
+
+        // Set up the connection
         URLConnection uc;
         uc = link.openConnection();
         uc.addRequestProperty("User-Agent", userAgent);
         uc.connect();
         uc.getInputStream();
-        //Code to download
+
+        // Code to download
         InputStream in = new BufferedInputStream(uc.getInputStream());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buf = new byte[1024];
         int n = 0;
-        while (-1!=(n=in.read(buf)))
-        {
+        while (-1!=(n=in.read(buf))) {
             out.write(buf, 0, n);
         }
         out.close();
         in.close();
-        byte[] response = out.toByteArray();
 
+        // save to file
+        byte[] response = out.toByteArray();
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(response);
         fos.close();
-        //End download code
     }
 }
