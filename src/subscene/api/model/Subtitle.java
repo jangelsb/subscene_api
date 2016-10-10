@@ -17,8 +17,9 @@ public class Subtitle {
 
     private String language  = "English";
     private String lanSuffix = "en";
+    private Type type = Type.Normal;
     private File video = null;
-    private Type type = Type.HI;
+    private boolean verbose = true;
 
     public Subtitle(File video) {
         this.video = video;
@@ -41,21 +42,26 @@ public class Subtitle {
         this.type = type;
     }
 
-    public Subtitle(String videoLoc, String language, String lanSuffix) {
-        this(new File(videoLoc), language, lanSuffix);
+    /**
+     * Turns on or off print statements
+     * @return a reference to this object, used for chaining
+     */
+
+    public Subtitle setVerbose(boolean verbose) {
+        this.verbose = verbose;
+        return this;
     }
 
-    public Subtitle(String videoLoc) {
-        this(new File(videoLoc));
-    }
-
+    /**
+     * Downloads the subtitle for the File passed into the constructor. The File doesn't need to be a real file, but it
+     * DOES need to have a file extension, as of right now. TODO implement a way to pass just a name and not a file
+     * @return the File of the new Subtitle if it found one, else null
+     */
     public File download() {
 
         try {
-
-            System.out.println("Searching subscene for: " + video.getName());
+            if(verbose) System.out.println("Searching subscene for: " + video.getName());
             String videoNamePure = video.getName().substring(0, video.getName().lastIndexOf("."));
-
             Document doc = getDocument("https://subscene.com/subtitles/release?q=" + video.getName());
 
             String downloadLink = null;
@@ -67,12 +73,12 @@ public class Subtitle {
                     break;
 
                 case ForeignLangOnly:
-                    downloadLink = findFirstForeignLangOnly(doc, videoNamePure);
+                    downloadLink = findFirstForeignLangOnlySub(doc, videoNamePure);
                     break;
 
                 // Normal
                 default:
-                    downloadLink = findFirstNonHI(doc, videoNamePure);
+                    downloadLink = findFirstNormalSub(doc, videoNamePure);
             }
 
             if (downloadLink != null) {
@@ -86,11 +92,33 @@ public class Subtitle {
     }
 
     // TODO make each JSOUP call a function call for readability
-    // grabs the first non colored HI english sub
-    
-    /**
-    * @return the download link for the subtitle
-    */
+    private String findFirstNormalSub(Document doc, String videoNamePure) throws IOException {
+        // if HI doesn't matter, with no check,
+        // link = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(English)").first().parent().parent().select("td.a1 a").first().attr("abs:href");
+
+        Elements allPossibleSubtitles = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(" + language + ")");
+
+        for (Element row : allPossibleSubtitles) {
+            // the language info is three deep in the dom tree
+            // if a41 exists, then it is an HI sub
+            Elements candidate = row.parent().parent().parent().select("td.a40");
+            if (!candidate.isEmpty()) {
+                String link = candidate.first().parent().select("td.a1 a").first().attr("abs:href");
+                Document doc2 = getDocument(link);
+
+                // check if download page has the correct filename in the description
+                boolean isCorrectSub = !doc2.select("li.release:contains(" + videoNamePure + ")").isEmpty();
+                if(isCorrectSub) {
+                    if(verbose) System.out.println("Download page: " + link);
+                    return doc2.select("#downloadButton").first().attr("abs:href");
+                }
+            }
+        }
+        return null;
+    }
+
+
+    // returns the download link for the subtitle
     private String findFirstHISub(Document doc, String videoNamePure) throws IOException  {
         Elements allPossibleSubtitles = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(" + language + ")");
 
@@ -101,13 +129,12 @@ public class Subtitle {
             if (!candidate.isEmpty()) {
                 String link = candidate.first().parent().select("td.a1 a").first().attr("abs:href");
                 Document doc2 = getDocument(link);
-
-                // download page has the correct filename in the description
-                boolean correctSub = !doc2.select("li.release:contains(" + videoNamePure + ")").isEmpty();
-                // download page has CHI in the description
+                // check if download page has the correct filename in the description
+                boolean isCorrectSub = !doc2.select("li.release:contains(" + videoNamePure + ")").isEmpty();
+                // check if download page has CHI in the description
                 boolean hasCHI = !doc2.select("li.release:contains(CHI)").isEmpty();
-                if(correctSub && !hasCHI) {
-                    System.out.println("Download page: " + link);
+                if(isCorrectSub && !hasCHI) {
+                    if(verbose) System.out.println("Download page: " + link);
                     return doc2.select("#downloadButton").first().attr("abs:href");
                 }
             }
@@ -115,13 +142,28 @@ public class Subtitle {
         return null;
     }
 
-    private String findFirstNonHI(Document doc, String videoNamePure) throws IOException {
-        // if HI doesn't matter, with no check,
-        // link = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(English)").first().parent().parent().select("td.a1 a").first().attr("abs:href");
-        return null;
-    }
+    private String findFirstForeignLangOnlySub(Document doc, String videoNamePure) throws IOException {
 
-    private String findFirstForeignLangOnly(Document doc, String videoNamePure) throws IOException {
+        Elements allPossibleSubtitles = doc.select("td.a1 span.l.r.neutral-icon:containsOwn(" + language + ")");
+
+        for (Element row : allPossibleSubtitles) {
+            // the language info is three deep in the dom tree
+            // if a41 exists, then it is an HI sub
+            String candidatePage = row.parent().parent().parent().select("td.a1 a").first().attr("abs:href");
+            Document doc2 = getDocument(candidatePage);
+
+            // check if candidate is Foreign Lang Only (FLO)
+            boolean isFLO = !doc2.select("#downloadButton").first().select("span:contains(Foreign parts only").isEmpty();
+            // check if download page has the correct filename in the description
+            boolean isCorrectSub = !doc2.select("li.release:contains(" + videoNamePure + ")").isEmpty();
+            // check if download page has CHI in the description
+            boolean isCHI = !doc2.select("li.release:contains(CHI)").isEmpty();
+
+            if(isFLO && isCorrectSub && !isCHI) {
+                if(verbose) System.out.println("Download page: " + candidatePage);
+                return doc2.select("#downloadButton").first().attr("abs:href");
+            }
+        }
         return null;
     }
 
@@ -145,7 +187,7 @@ public class Subtitle {
         new File("subtitle.zip").delete();
         FileUtils.deleteDirectory(videoDir);
 
-        System.out.println("Subtitle: " + toReturn);
+        if(verbose) System.out.println("Subtitle: " + toReturn);
 
         return toReturn;
     }
