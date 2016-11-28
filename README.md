@@ -3,7 +3,7 @@
 
 This API supports Normal, HI (Hearing Impaired), and Foreign Language Only modes!
 
-### How does I use it? ###
+### How do I use it? ###
 Just download the lastest jar file from the [release page](https://github.com/jangelsb/subscene_api/releases) (or grab a [nightly](https://github.com/jangelsb/subscene_api/tree/master/out/artifacts/subscene_api_jar)) and import it into your project.
 
 Example Usage:
